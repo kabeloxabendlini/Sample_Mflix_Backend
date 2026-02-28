@@ -1,19 +1,21 @@
-// server.js
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import app from "./app.js";
 
+// Load environment variables
 dotenv.config();
 
+// Validate environment variables
 const PORT = process.env.PORT || 5000;
-const DB_URI = process.env.MOVIEREVIEWS_DB_URI || process.env.LOCAL_MONGO_URI;
+const DB_URI = process.env.MOVIEREVIEWS_DB_URI;
 
+// Validate MongoDB URI
 if (!DB_URI) {
   console.error("❌ MOVIEREVIEWS_DB_URI missing in .env");
   process.exit(1);
 }
 
-// ---------------- MongoDB Connection ----------------
+// Start the server after connecting to MongoDB
 async function startServer() {
   try {
     await mongoose.connect(DB_URI, { serverSelectionTimeoutMS: 5000 });
@@ -27,8 +29,5 @@ async function startServer() {
     process.exit(1);
   }
 }
-
-// Test route to verify backend is live
-app.get("/api/test", (req, res) => res.send("Backend is running!"));
 
 startServer();
