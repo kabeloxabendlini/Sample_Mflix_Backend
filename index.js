@@ -1,48 +1,28 @@
 import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
+import cors from "cors";
+import moviesRouter from "./api/movies.route.js";
 
-dotenv.config();
-
+// Create Express app
 const app = express();
+
+// Middleware //
 app.use(express.json());
 
-// Env vars
-const PORT = process.env.PORT || 5000;
-const DB_URI =
-  process.env.NODE_ENV === "production"
-    ? process.env.MOVIEREVIEWS_DB_URI
-    : process.env.LOCAL_MONGO_URI || process.env.MOVIEREVIEWS_DB_URI;
+// CORS configuration //
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://sample-mflix-frontend.onrender.com",
+    ],
+    credentials: true,
+  })
+);
 
-// Safety check
-if (!DB_URI) {
-  console.error("❌ MOVIEREVIEWS_DB_URI is missing in .env");
-  process.exit(1);
-}
+// API routes //
+app.use("/api/v1/movies", moviesRouter);
 
-// MongoDB connection
-async function startServer() {
-  try {
-    await mongoose.connect(DB_URI, {
-      serverSelectionTimeoutMS: 5000,
-    });
-
-    console.log("✅ Connected to MongoDB Atlas");
-
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("❌ Failed to connect to MongoDB", error);
-    process.exit(1);
-  }
-}
-
-// Example test route
-app.get("/api/test", (req, res) => {
-  res.send("Backend is running!");
-});
-
-startServer();
+// 404 handler for unmatched routes
+app.use((req, res) => res.status(404).json({ error: "not found" }));
 
 export default app;

@@ -1,26 +1,34 @@
-import express from "express";
-import cors from "cors";
-import moviesRouter from "./api/movies.route.js";
+// server.js
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import app from "./app.js";
 
-const app = express();
+dotenv.config();
 
-app.use(express.json());
+const PORT = process.env.PORT || 5000;
+const DB_URI = process.env.MOVIEREVIEWS_DB_URI || process.env.LOCAL_MONGO_URI;
 
-// CORS must come before routes
-app.use(
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "https://sample-mflix-frontend.onrender.com"
-    ],
-    credentials: true,
-  })
-);
+if (!DB_URI) {
+  console.error("❌ MOVIEREVIEWS_DB_URI missing in .env");
+  process.exit(1);
+}
 
-// Routes
-app.use("/api/v1/movies", moviesRouter);
+// ---------------- MongoDB Connection ----------------
+async function startServer() {
+  try {
+    await mongoose.connect(DB_URI, { serverSelectionTimeoutMS: 5000 });
+    console.log("✅ Connected to MongoDB");
 
-// 404 handler
-app.use((req, res) => res.status(404).json({ error: "not found" }));
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Failed to connect to MongoDB", error);
+    process.exit(1);
+  }
+}
 
-export default app;
+// Test route to verify backend is live
+app.get("/api/test", (req, res) => res.send("Backend is running!"));
+
+startServer();
