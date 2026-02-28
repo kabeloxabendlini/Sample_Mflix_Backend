@@ -17,18 +17,3 @@ app.use((req, res) => {
 
 export default app;
 
-// # "mongodb+srv://kabeloxabendlini385_db_user:Mi09JWwJGvtbkSX7@moviereviews.nwqbw3y.mongodb.net/sample_mflix?appName=movieReviews";
-// # {
-// #   "compilerOptions": {
-// #     "target": "ES2020",
-// #     "module": "CommonJS",
-// #     "rootDir": "./src",
-// #     "outDir": "./dist",
-// #     "strict": true,
-// #     "esModuleInterop": true,
-// #     "moduleResolution": "node",
-// #     "types": ["node"]
-// #   },
-// #   "include": ["**/*.ts"],
-// #   "exclude": ["node_modules"]
-// # }
