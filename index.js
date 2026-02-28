@@ -5,13 +5,14 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-
-// Middleware
 app.use(express.json());
 
 // Env vars
 const PORT = process.env.PORT || 5000;
-const DB_URI = process.env.MOVIEREVIEWS_DB_URI;
+const DB_URI =
+  process.env.NODE_ENV === "production"
+    ? process.env.MOVIEREVIEWS_DB_URI
+    : process.env.LOCAL_MONGO_URI || process.env.MOVIEREVIEWS_DB_URI;
 
 // Safety check
 if (!DB_URI) {
@@ -19,7 +20,7 @@ if (!DB_URI) {
   process.exit(1);
 }
 
-// MongoDB connection
+// Connect MongoDB
 async function startServer() {
   try {
     await mongoose.connect(DB_URI, {
@@ -29,7 +30,7 @@ async function startServer() {
     console.log("✅ Connected to MongoDB Atlas");
 
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   } catch (error) {
     console.error("❌ Failed to connect to MongoDB", error);
@@ -38,4 +39,5 @@ async function startServer() {
 }
 
 startServer();
+
 export default app;
