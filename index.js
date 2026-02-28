@@ -20,7 +20,7 @@ if (!DB_URI) {
   process.exit(1);
 }
 
-// Connect MongoDB
+// MongoDB connection
 async function startServer() {
   try {
     await mongoose.connect(DB_URI, {
@@ -37,6 +37,11 @@ async function startServer() {
     process.exit(1);
   }
 }
+
+// Example test route
+app.get("/api/test", (req, res) => {
+  res.send("Backend is running!");
+});
 
 startServer();
 
