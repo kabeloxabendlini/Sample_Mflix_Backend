@@ -1,28 +1,39 @@
-import express from "express";
-import cors from "cors";
-import moviesRouter from "./api/movies.route.js";
+import dotenv from "dotenv";
+import { MongoClient } from "mongodb";
+import app from "./app.js";
+import MoviesDAO from "./dao/moviesDAO.js";
+import ReviewsDAO from "./dao/reviewsDAO.js";
 
-// Create Express app
-const app = express();
+dotenv.config();
 
-// Middleware //
-app.use(express.json());
+// Environment variables
+const PORT = process.env.PORT || 5000;
+const DB_URI = process.env.MOVIEREVIEWS_DB_URI;
 
-// CORS configuration //
-app.use(
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "https://sample-mflix-frontend.onrender.com",
-    ],
-    credentials: true,
-  })
-);
+// Safety check for DB URI
+if (!DB_URI) {
+  console.error("❌ MOVIEREVIEWS_DB_URI is missing in environment variables");
+  process.exit(1);
+}
 
-// API routes //
-app.use("/api/v1/movies", moviesRouter);
+async function startServer() {
+  try {
+    const client = new MongoClient(DB_URI);
+    await client.connect();
 
-// 404 handler for unmatched routes
-app.use((req, res) => res.status(404).json({ error: "not found" }));
+    console.log("✅ Connected to MongoDB Atlas");
 
-export default app;
+    await MoviesDAO.injectDB(client);
+    await ReviewsDAO.injectDB(client);
+    
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Failed to connect to MongoDB", error);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer();
