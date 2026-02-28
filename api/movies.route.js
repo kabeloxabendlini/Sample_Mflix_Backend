@@ -15,7 +15,7 @@ router.route("/ratings")
 
 router.route("/:id")
   .get(MoviesController.apiGetMovieById);
-
+  
 /**
  * Reviews routes
  */
