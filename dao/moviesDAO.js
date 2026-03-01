@@ -57,13 +57,10 @@ export default class MoviesDAO {
 
   static async getMovieById(id) {
     try {
-      if (!ObjectId.isValid(id))
-        return null;
+      if (!ObjectId.isValid(id)) return null;
 
-      return await movies.aggregate([
-        {
-          $match: { _id: new ObjectId(id) }
-        },
+      const movie = await movies.aggregate([
+        { $match: { _id: new ObjectId(id) } },
         {
           $lookup: {
             from: "reviews",
@@ -72,7 +69,26 @@ export default class MoviesDAO {
             as: "reviews",
           },
         },
+        {
+          $addFields: {
+            reviews: {
+              $map: {
+                input: "$reviews",
+                as: "r",
+                in: {
+                  _id: "$$r._id",
+                  name: "$$r.name",
+                  user_id: "$$r.user_id",
+                  review: "$$r.review",
+                  date: "$$r.date",
+                },
+              },
+            },
+          },
+        },
       ]).next();
+
+      return movie;
     } catch (e) {
       console.error(`something went wrong in getMovieById: ${e}`);
       return null;
