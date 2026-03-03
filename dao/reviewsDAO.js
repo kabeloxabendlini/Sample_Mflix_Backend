@@ -1,6 +1,6 @@
 import mongodb from "mongodb";
-
 const ObjectId = mongodb.ObjectId;
+
 let reviews;
 
 export default class ReviewsDAO {
@@ -12,82 +12,51 @@ export default class ReviewsDAO {
         .db(process.env.MOVIEREVIEWS_NS)
         .collection("reviews");
     } catch (e) {
-      console.error(`Unable to establish collection handle in ReviewsDAO: ${e}`);
+      console.error(`Unable to establish collection handles: ${e}`);
     }
   }
 
-  static async getReviewsByMovieId(movieId) {
+  static async addReview(reviewData) {
     try {
-      return await reviews
-        .find({ movie_id: new ObjectId(movieId) })
-        .toArray();
-    } catch (e) {
-      console.error(`Unable to get reviews: ${e}`);
-      return [];
-    }
-  }
-
-  static async addReview(movieId, user, review, date) {
-    try {
-      const reviewDoc = {
-        name: user.name,
-        user_id: user._id,
-        date,
-        review,
-        movie_id: new ObjectId(movieId),
+      const review = {
+        movie_id: new ObjectId(reviewData.movie_id),
+        user_id: reviewData.user_id,
+        name: reviewData.name,
+        text: reviewData.text,
+        date: reviewData.date
       };
 
-      const result = await reviews.insertOne(reviewDoc);
-
-      if (result.insertedCount === 1) {
-        return { success: true, reviewId: result.insertedId };
-      } else {
-        return { success: false, message: "Failed to add review." };
-      }
+      return await reviews.insertOne(review);
 
     } catch (e) {
       console.error(`Unable to post review: ${e}`);
-      return { success: false, error: e };
+      return { error: e };
     }
   }
 
-  static async updateReview(reviewId, userId, review, date) {
+  static async updateReview(review_id, user_id, text, date) {
     try {
-      const result = await reviews.updateOne(
-        { _id: new ObjectId(reviewId), user_id: userId },
-        { $set: { review, date } }
+      return await reviews.updateOne(
+        { _id: new ObjectId(review_id), user_id: user_id },
+        { $set: { text: text, date: date } }
       );
-
-      if (result.matchedCount === 0) {
-        return { success: false, message: "Review not found or not authorized." };
-      } else if (result.modifiedCount === 1) {
-        return { success: true };
-      } else {
-        return { success: false, message: "Nothing was updated." };
-      }
 
     } catch (e) {
       console.error(`Unable to update review: ${e}`);
-      return { success: false, error: e };
+      return { error: e };
     }
   }
 
-  static async deleteReview(reviewId, userId) {
+  static async deleteReview(review_id, user_id) {
     try {
-      const result = await reviews.deleteOne({
-        _id: new ObjectId(reviewId),
-        user_id: userId,
+      return await reviews.deleteOne({
+        _id: new ObjectId(review_id),
+        user_id: user_id
       });
-
-      if (result.deletedCount === 1) {
-        return { success: true };
-      } else {
-        return { success: false, message: "Review not found or not authorized." };
-      }
 
     } catch (e) {
       console.error(`Unable to delete review: ${e}`);
-      return { success: false, error: e };
+      return { error: e };
     }
   }
 }
