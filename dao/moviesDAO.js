@@ -70,21 +70,21 @@ export default class MoviesDAO {
           },
         },
         {
-          $addFields: {
-            reviews: {
-              $map: {
-                input: "$reviews",
-                as: "r",
-                in: {
-                  _id: "$$r._id",
-                  name: "$$r.name",
-                  user_id: "$$r.user_id",
-                  review: "$$r.review",
-                  date: "$$r.date",
-                },
-              },
-            },
-          },
+         $addFields: {
+  reviews: {
+    $map: {
+      input: "$reviews",
+      as: "r",
+      in: {
+        _id: "$$r._id",
+        name: "$$r.name",
+        user_id: "$$r.user_id",
+        review: "$$r.text",  // <-- map to text
+        date: "$$r.date",
+      },
+    },
+  },
+},
         },
       ]).next();
 
